@@ -32,7 +32,9 @@ ws << (red | green | blue | blue_back ) << "Some text\n";
 
 ## Building
 
-To build with Microsoft tools:
+### Microsoft Toolchain
+
+Open a Visual Studio command prompt, and execute the following commands
 
 ```
 mkdir build
@@ -41,7 +43,9 @@ cmake .. -G "NMake Makefiles"
 NMake
 ```
 
-To build with MinGW:
+### MinGW
+
+Open the MinGW command prompt (the Microsoft one, not a bash shell), and execute the following commands (filling in the path to your installatio of MinGW where indicated):
 
 ```
 mkdir build
@@ -50,6 +54,6 @@ cmake .. -G "MinGW Makefiles" -DCMAKE_MAKE_PROGRAM="<path to mingw>\make"
 make
 ```
 
-That should build a WinBuf library (WinBuf.lib or WinBuf.a, as applicable) and a TestStatic.exe, which should run a small test, clearing the screen to grey text on a blue background, and writing a little bit of test in a couple different colors.
+That should build a WinBuf library (WinBuf.lib or WinBuf.a, as applicable) and a TestStatic.exe, which should run a small test, clearing the screen to grey text on a blue background, and writing a little bit of text in a couple different colors.
 
 The file test_Winbuf.cpp contains a quick demonstration of how to use the code. It's what builds to the testStatic.exe
