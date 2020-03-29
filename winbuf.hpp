@@ -3,15 +3,19 @@
 #include <ostream>
 #include <windows.h>
 
+//! A C++ streambuf that writes directly to a Windows console
 class WinBuf : public std::streambuf
 {
     HANDLE h;
 
 public:
+    //! Create a WinBuf from an Windows handle
+    //! @param h handle to a Windows console
     WinBuf(HANDLE h) : h(h) {}
     WinBuf(WinBuf const &) = delete;
     WinBuf &operator=(WinBuf const &) = delete;
 
+    //! Return the handle to which this buffer is attached
     HANDLE handle() const { return h; }
 
 protected:
@@ -33,26 +37,34 @@ protected:
     }
 };
 
+//! A C++ ostream that  writes via the preceding WinBuf
 class WinStream : public virtual std::ostream
 {
     WinBuf buf;
 
 public:
+    //! Create stream for a Windows console, defaulting to standard output
     WinStream(HANDLE dest = GetStdHandle(STD_OUTPUT_HANDLE))
         : buf(dest), std::ostream(&buf)
     {
     }
 
+    //! return a pointer to the underlying WinBuf
     WinBuf *rdbuf() { return &buf; }
 };
 
+//! Provide the ability to set attributes (text colors)
 class SetAttr
 {
     WORD attr;
 
 public:
+    //! Save user's attribute for when this SetAttr object is written out
     SetAttr(WORD attr) : attr(attr) {}
 
+    //! Support writing the SetAttr object to a WinStream
+    //! @param w a WinStream object to write to
+    //! @param c An attribute to set
     friend WinStream &operator<<(WinStream &w, SetAttr const &c)
     {
         WinBuf *buf = w.rdbuf();
@@ -61,19 +73,24 @@ public:
         return w;
     }
 
+    //! support combining attributes
+    //! @param r the attribute to combine with this one
     SetAttr operator|(SetAttr const &r)
     {
         return SetAttr(attr | r.attr);
     }
 };
 
+//! Support setting the position for succeeding output
 class gotoxy
 {
     COORD coord;
 
 public:
+    //! Save position for when object is written to stream
     gotoxy(SHORT x, SHORT y) : coord{.X = x, .Y = y} {}
 
+    //! support writing gotoxy object to stream
     friend WinStream &operator<<(WinStream &w, gotoxy const &pos)
     {
         WinBuf *buf = w.rdbuf();
@@ -83,13 +100,19 @@ public:
     }
 };
 
+//! Clear the "screen"
 class cls
 {
     char ch;
 
 public:
+    //! Creat screen clearing object
+    //! @param ch character to use to fill screen
     cls(char ch = ' ') : ch(ch) {}
 
+    //! Support writing to a stream
+    //! @param os the WinStream to write to
+    //! @param c the cls object to write
     friend WinStream &operator<<(WinStream &os, cls const &c)
     {
         COORD tl = {0, 0};
@@ -106,6 +129,8 @@ public:
     }
 };
 
+//! Provide some convenience instances of the SetAttr object
+//! to (marginally) ease setting colors.
 extern SetAttr red;
 extern SetAttr green;
 extern SetAttr blue;
